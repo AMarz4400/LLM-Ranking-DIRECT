@@ -31,13 +31,18 @@ Unlike standard implementations, this project focuses on **scalability**, **rank
 ## 🛠️ Setup & Installation
 
 ### 1. Environment Setup
-```bash
+
 # Clone the repository
 git clone https://github.com/AMarz4400/llm-ranking-direct.git
 cd llm-ranking-direct
 
-# Install dependencies
+# Install core dependencies and setup datasets
+# This script handles PyTorch Nightly, Transformers (GitHub), and NLTK data
+sh gemma_setup.sh
+
+# Install remaining utilities
 pip install -r requirements.txt
+
 2. Data Preparation Pipeline
 
 This project requires a multi-step data preparation to handle the LLM computational load upfront.
