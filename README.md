@@ -32,7 +32,7 @@ Unlike standard implementations, this project focuses on **scalability**, **rank
 
 ### 1. Environment Setup
 
-```bash
+
 # Clone the repository
 git clone [https://github.com/AMarz4400/llm-ranking-direct.git](https://github.com/AMarz4400/llm-ranking-direct.git)
 cd llm-ranking-direct
