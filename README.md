@@ -48,24 +48,24 @@ This project requires a multi-step data preparation to handle the LLM computatio
 
 Step A: Download & Setup Downloads datasets (Amazon Reviews), installs NLTK data, and caches the T5-Gemma model.
 
-Bash
+
 
 sh gemma_setup.sh
 Step B: Pre-compute Embeddings Generates semantic embeddings for Users and Items using T5-Gemma. Requires GPU.
 
-Bash
+
 
 python precompute_embeddings.py
 Step C: Consolidate Data Merges the thousands of batch files generated in Step B into optimized .npy binaries for fast training access.
 
-Bash
+
 
 python consolidate_embeddings.py
 🚀 Usage
 Training (BPR Loss)
 To train the model using the BPR ranking setup on the pre-computed data:
 
-Bash
+
 
 python Main_T5Gemma.py train \
     --lr 0.0001 \
@@ -76,7 +76,7 @@ python Main_T5Gemma.py train \
 Hyperparameter Grid Search
 To run a Grid Search for hyperparameter optimization (saves results in outputs/):
 
-Bash
+
 
 python Main_T5Gemma.py grid \
     --setup BPR \
@@ -84,7 +84,7 @@ python Main_T5Gemma.py grid \
 Evaluation & Testing
 To evaluate a trained model checkpoint:
 
-Bash
+
 
 python Test_Embeddings.py test \
     --lr 0.0001 \
