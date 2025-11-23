@@ -33,13 +33,18 @@ Unlike standard implementations, this project focuses on **scalability**, **rank
 ### 1. Environment Setup
 ```bash
 # Clone the repository
-git clone [https://github.com/AMarz4400/llm-ranking-direct.git](https://github.com/AMarz4400/llm-ranking-direct.git)
+git clone https://github.com/AMarz4400/llm-ranking-direct.git
 cd llm-ranking-direct
 
 # Install dependencies
 pip install -r requirements.txt
-2. Data Preparation PipelineThis project requires a multi-step data preparation to handle the LLM computational load upfront.
-Step A: Download & SetupDownloads datasets (Amazon Reviews), installs NLTK data, and caches the T5-Gemma model.
+2. Data Preparation Pipeline
+
+This project requires a multi-step data preparation to handle the LLM computational load upfront.
+
+Step A: Download & Setup
+
+Downloads datasets (Amazon Reviews), installs NLTK data, and caches the T5-Gemma model.
 
 sh gemma_setup.sh
 
