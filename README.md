@@ -31,9 +31,9 @@ Unlike standard implementations, this project focuses on **scalability**, **rank
 ## 🛠️ Setup & Installation
 
 ### 1. Environment Setup
-
+```bash
 # Clone the repository
-git clone https://github.com/AMarz4400/llm-ranking-direct.git
+git clone [https://github.com/AMarz4400/llm-ranking-direct.git](https://github.com/AMarz4400/llm-ranking-direct.git)
 cd llm-ranking-direct
 
 # Install core dependencies and setup datasets
@@ -42,68 +42,69 @@ sh gemma_setup.sh
 
 # Install remaining utilities
 pip install -r requirements.txt
-
 2. Data Preparation Pipeline
-
 This project requires a multi-step data preparation to handle the LLM computational load upfront.
 
-Step A: Download & Setup
+Step A: Download & Setup Downloads datasets (Amazon Reviews), installs NLTK data, and caches the T5-Gemma model.
 
-Downloads datasets (Amazon Reviews), installs NLTK data, and caches the T5-Gemma model.
+Bash
 
 sh gemma_setup.sh
+Step B: Pre-compute Embeddings Generates semantic embeddings for Users and Items using T5-Gemma. Requires GPU.
 
-Step B: Pre-compute EmbeddingsGenerates semantic embeddings for Users and Items using T5-Gemma. Requires GPU.
+Bash
 
 python precompute_embeddings.py
+Step C: Consolidate Data Merges the thousands of batch files generated in Step B into optimized .npy binaries for fast training access.
 
-Step C: Consolidate DataMerges the thousands of batch files generated in Step B into optimized .npy binaries for fast training access.
+Bash
 
 python consolidate_embeddings.py
+🚀 Usage
+Training (BPR Loss)
+To train the model using the BPR ranking setup on the pre-computed data:
 
+Bash
 
-🚀 UsageTraining (BPR Loss)To train the model using the BPR ranking setup on the pre-computed data:
-
-(example)
 python Main_T5Gemma.py train \
     --lr 0.0001 \
     --setup BPR \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json \
     --aspc_num 5 \
     --num_epochs 50
+Hyperparameter Grid Search
+To run a Grid Search for hyperparameter optimization (saves results in outputs/):
 
+Bash
 
-Hyperparameter Grid SearchTo run a Grid Search for hyperparameter optimization (saves results in outputs/):
-
-(example)
 python Main_T5Gemma.py grid \
     --setup BPR \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json
+Evaluation & Testing
+To evaluate a trained model checkpoint:
 
+Bash
 
-Evaluation & TestingTo evaluate a trained model checkpoint:
-
-(example)
 python Test_Embeddings.py test \
     --lr 0.0001 \
     --setup BPR \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json \
     --parameters "./outputs/reviews_Clothing_Shoes_and_Jewelry_5/YOUR_BEST_MODEL.pth"
-
-
 📊 Performance
 By switching to BPR Loss and T5-Gemma embeddings, the model achieves improved results on sparse datasets compared to traditional baselines, on ranking metrics like Recall, Precision, Hit Rate.
 
 📚 References & Acknowledgements
-This project is an evolution of the DIRECT framework.Modifications were made to integrate LLM capabilities and ranking objectives.If you use this code, please cite the original 
+This project is an evolution of the DIRECT framework. Modifications were made to integrate LLM capabilities and ranking objectives.
 
 If you use this code, please cite the original DIRECT paper and the model providers:
 
-**Original DIRECT Paper:**
-> *Wu, X., Wan, H., Tan, Q., Yao, W., & Liu, N. (2024). "DIRECT: Dual Interpretable Recommendation with Multi-aspect Word Attribution." ACM Transactions on Intelligent Systems and Technology (TIST).*
+Original DIRECT Paper:
 
-**LLM Backbone:**
-> *Google DeepMind. (2024). "T5Gemma: Encoder-Decoder Large Language Models."*
+Wu, X., Wan, H., Tan, Q., Yao, W., & Liu, N. (2024). "DIRECT: Dual Interpretable Recommendation with Multi-aspect Word Attribution." ACM Transactions on Intelligent Systems and Technology (TIST).
+
+LLM Backbone:
+
+Google DeepMind. (2024). "T5Gemma: Encoder-Decoder Large Language Models."
 
 📜 License
 This project is licensed under the MIT License - see the LICENSE file for details.
