@@ -47,6 +47,7 @@ cd llm-ranking-direct
 ```bash
 sh gemma_setup.sh
 ```
+
 **Installa le utility rimanenti:**
 
 ```bash
@@ -57,23 +58,28 @@ pip install -r requirements.txt
 
 Questo progetto utilizza una pipeline multi-step:
 
-Passaggio	Script	Descrizione	Requisiti
+
 **A. Download & Setup**:	
 ```bash
 sh gemma_setup.sh	
 ```
-Scarica i dataset Amazon Reviews, dati NLTK e T5-Gemma.	—
+Scarica i dataset Amazon Reviews, dati NLTK e T5-Gemma.	
 
 **B. Pre-calcolo**	
 
 ```bash
 python precompute_embeddings.py	
-Genera embedding semantici per utenti e articoli.	GPU
 ```
+Genera embedding semantici per utenti e articoli.	GPU
+
+
 **C. Consolidamento**	
 ```bash
-python consolidate_embeddings.py	Unisce i batch di embedding in file .npy.	—
+python consolidate_embeddings.py	
 ```
+Unisce i batch di embedding in file .npy.
+
+
 ## 🚀 Utilizzo
 **Training (BPR Loss)**
 ```
