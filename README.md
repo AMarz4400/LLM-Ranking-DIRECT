@@ -32,14 +32,7 @@ A differenza delle implementazioni standard, questo progetto si concentra su **s
 
 ---
 
-## 🛠️ Setup & Installazione
-
-### 1. Configurazione dell'Ambiente
-
-Clona il repository:
-
-```bash
-git clone [https://github.com/AMarz4400/llm-ranking-direct.git](https://github.com/AMarz4400/llm-ranking-direct.git)
+🛠️ Setup & Installazione1. Configurazione dell'AmbienteClona il repository:Bashgit clone https://github.com/AMarz4400/llm-ranking-direct.git
 cd llm-ranking-direct
 Installa le dipendenze principali e configura i dataset:Questo script gestisce PyTorch Nightly, Transformers (GitHub), e i dati NLTK.Bashsh gemma_setup.sh
 Installa le utility rimanenti:Bashpip install -r requirements.txt
