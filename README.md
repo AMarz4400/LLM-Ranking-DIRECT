@@ -36,46 +36,47 @@ A differenza delle implementazioni standard, questo progetto si concentra su **s
 
 ### 1. Configurazione dell'Ambiente
 
-Clona il repository:
+**Clona il repository:**
 
 ```bash
 git clone https://github.com/AMarz4400/llm-ranking-direct.git
 cd llm-ranking-direct
-
-## Installa le dipendenze principali:
+```
+**Installa le dipendenze principali:**
 
 ```bash
 sh gemma_setup.sh
-
-## Installa le utility rimanenti:
+```
+**Installa le utility rimanenti:**
 
 ```bash
 pip install -r requirements.txt
+```
 
-## 2. Pipeline di Preparazione dei Dati
+### 2. Pipeline di Preparazione dei Dati
 
 Questo progetto utilizza una pipeline multi-step:
 
 Passaggio	Script	Descrizione	Requisiti
-A. Download & Setup:	
-bash
+**A. Download & Setup**:	
+```bash
 sh gemma_setup.sh	
-
+```
 Scarica i dataset Amazon Reviews, dati NLTK e T5-Gemma.	—
 
-B. Pre-calcolo	
+**B. Pre-calcolo**	
 
-bash
+```bash
 python precompute_embeddings.py	
 Genera embedding semantici per utenti e articoli.	GPU
-
-C. Consolidamento	
-bash
+```
+**C. Consolidamento**	
+```bash
 python consolidate_embeddings.py	Unisce i batch di embedding in file .npy.	—
-
+```
 ## 🚀 Utilizzo
-### Training (BPR Loss)
-
+**Training (BPR Loss)**
+```
 bash
 python Main_T5Gemma.py train \
     --lr 0.0001 \
@@ -83,34 +84,35 @@ python Main_T5Gemma.py train \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json \
     --aspc_num 5 \
     --num_epochs 50
+```
 
+**Hyperparameter Grid Search**
 
-### Hyperparameter Grid Search
-
-bash
+```bash
 python Main_T5Gemma.py grid \
     --setup BPR \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json
+```
 
-
-### Valutazione & Testing
-bash
+**Valutazione & Testing**
+```bash
 python Test_Embeddings.py test \
     --lr 0.0001 \
     --setup BPR \
     --datafile ./datasets/reviews_Clothing_Shoes_and_Jewelry_5.json \
     --parameters "./outputs/reviews_Clothing_Shoes_and_Jewelry_5/YOUR_BEST_MODEL.pth"
+```
 
-## 📊 Performance
+### 📊 Performance
 La combinazione tra BPR Loss ed embedding T5-Gemma migliora significativamente le metriche di ranking (Recall, Precision, Hit Rate) rispetto alle baseline classiche.
 
-## 📚 Riferimenti & Riconoscimenti
+### 📚 Riferimenti & Riconoscimenti
 Questo progetto è un'estensione del framework DIRECT.
 
-### Articolo DIRECT originale:
+**Articolo DIRECT originale:**
 Wu, X., Wan, H., Tan, Q., Yao, W., & Liu, N. (2024). DIRECT: Dual Interpretable Recommendation with Multi-aspect Word Attribution. ACM TIST.
 
-### Backbone LLM:
+**Backbone LLM:**
 Google DeepMind (2024). T5Gemma: Encoder-Decoder Large Language Models.
 
 ## 📜 Licenza
