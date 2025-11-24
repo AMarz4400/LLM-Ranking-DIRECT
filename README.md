@@ -70,7 +70,7 @@ Scarica i dataset Amazon Reviews, dati NLTK e T5-Gemma.
 ```bash
 python precompute_embeddings.py	
 ```
-Genera embedding semantici per utenti e articoli.	GPU
+Genera embedding semantici per utenti e articoli.
 
 
 **C. Consolidamento**	
