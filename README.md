@@ -38,18 +38,18 @@ A differenza delle implementazioni standard, questo progetto si concentra su **s
 
 Clona il repository:
 
-bash
+```bash
 git clone https://github.com/AMarz4400/llm-ranking-direct.git
 cd llm-ranking-direct
 
 ## Installa le dipendenze principali:
 
-bash
+```bash
 sh gemma_setup.sh
 
 ## Installa le utility rimanenti:
 
-bash
+```bash
 pip install -r requirements.txt
 
 ## 2. Pipeline di Preparazione dei Dati
