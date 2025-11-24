@@ -2,7 +2,7 @@
 
 **Evolution of Recommender Systems with Ranking-Based Approach and LLM Embeddings**
 
-Questo repository contiene l'implementazione di un **Sistema di Raccomandazione ibrido** che integra embedding di **Large Language Model (LLM)** per migliorare le performance di ranking. È basato sul framework DIRECT, ma significativamente rifattorizzato per supportare rappresentazioni semantiche all'avanguardia e pipeline di training efficienti.
+Questo repository contiene l'implementazione di un **Sistema di Raccomandazione ibrido** che integra embedding di **Large Language Model (LLM)** per migliorare le performance di ranking. È basato sul framework DIRECT, ma significativamente rifattorizzato per supportare rappresentazioni semantiche derivanti da LLM **(T5Gemma)** e pipeline di training efficienti.
 
 ---
 
@@ -11,7 +11,7 @@ Questo repository contiene l'implementazione di un **Sistema di Raccomandazione 
 A differenza delle implementazioni standard, questo progetto si concentra su **scalabilità**, **ottimizzazione del ranking** e **best practice di ingegneria del software**:
 
 - **Integrazione LLM (T5-Gemma):** Sostituiti gli embedding legacy di BERT con `google/t5gemma-2b`, consentendo una comprensione semantica superiore delle recensioni degli utenti e delle descrizioni degli articoli.
-- **Pipeline di Pre-calcolo Offline:** Progettata una pipeline di ingestione dati multi-stadio (`precompute_embeddings.py` e `consolidate_embeddings.py`) per generare e archiviare **100GB+ di embedding offline**.
+- **Pipeline di Pre-calcolo Offline:** Progettata una pipeline di ingestione dati multi-stage (`precompute_embeddings.py` e `consolidate_embeddings.py`) per generare e archiviare **100GB+ di embedding offline**.
 - **Loss Orientata al Ranking (BPR):** Rifattorizzato l'obiettivo di training da MSE a **Bayesian Personalized Ranking (BPR) Loss**.
 - **Ottimizzazione della Memoria:** Implementato un loader `MetaIndex` per gestire massive matrici di embedding in RAM.
 
