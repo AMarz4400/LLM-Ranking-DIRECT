@@ -54,7 +54,6 @@ class DIRECT(tc.nn.Module):
 
     # --- MODIFICA: La funzione 'prepare_item_embedding' non serve più ---
     def prepare_item_embedding(self, *args, **kwargs):
-        # La lasciamo vuota per non rompere la chiamata nello script di training
         print("INFO: 'prepare_item_embedding' non è più necessaria con gli embedding pre-calcolati. Saltata.")
         pass
 
@@ -67,7 +66,7 @@ class DIRECT(tc.nn.Module):
         uid, iid = uid.to(self.device), iid.to(self.device)
         user_hist = user_hist_ids.to(self.device)
 
-        # --- INIZIO MODIFICA: Usiamo gli embedding pre-calcolati ---
+        # Usiamo gli embedding pre-calcolati ---
         # Spostiamo gli embedding e le maschere (che sono già tensori) sulla GPU
         user_emb = user_doc_embedding.to(self.device)
         user_mask = user_doc_mask.to(self.device)
@@ -89,8 +88,7 @@ class DIRECT(tc.nn.Module):
         return tc.tanh(self.sentiment_tagging(embs)).squeeze()
 
     def _interest(self, doc_emb, doc_mask, hist):
-        # NOTA: Questa parte usa self.item_embs, che sono embedding addestrabili,
-        # non quelli pre-calcolati. Questo è corretto per la logica del modello.
+
         domains = [self.review_agg(doc_emb, doc_mask),
                    self.history_agg(self.item_embs[hist.long()], tc.where(hist >= 1, 1.0, 0.0))]
         user_emb = self.interest_proj(*domains)
@@ -109,8 +107,4 @@ class DIRECT(tc.nn.Module):
         ypred = ypred.to(self.device).float()
         ytrue = ytrue.to(self.device).float()
         loss = self.lossfn(ypred, ytrue)
-        # Ricorda che le loss custom sono disattivate e richiederebbero un lavoro
-        # di adattamento per funzionare con gli embedding pre-calcolati.
-        # if self.training:
-        #     loss = loss + ...
         return loss

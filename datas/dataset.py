@@ -74,8 +74,6 @@ class MetaIndex:
         self.user_hist = CorpusSearchIndex(os.path.join(root, "user_history.txt"), cache_freq)
         self.item_hist = CorpusSearchIndex(os.path.join(root, "item_history.txt"), cache_freq)
 
-        # --- MODIFICA: Ripristiniamo il Memory Mapping ---
-
         print("INFO: Inizio caricamento degli embedding consolidati in RAM...")
 
         user_embeddings_file = os.path.join(root, "all_user_embeddings.npy")
@@ -83,7 +81,6 @@ class MetaIndex:
         item_embeddings_file = os.path.join(root, "all_item_embeddings.npy")
         item_masks_file = os.path.join(root, "all_item_masks.npy")
 
-        # Rimuoviamo 'mmap_mode' per caricare l'intero array in memoria.
         self.user_embeddings = np.load(user_embeddings_file)
         self.user_masks = np.load(user_masks_file)
         self.item_embeddings = np.load(item_embeddings_file)
@@ -95,9 +92,6 @@ class MetaIndex:
         # --- FINE MODIFICA ---
 
     def get_feed_dict(self, uid, iid, current_review=""):
-        # Questa funzione rimane identica alla versione precedente.
-        # L'accesso a self.user_embeddings[uid] sarà ora un accesso alla RAM,
-        # ancora più veloce del memory mapping.
 
         if isinstance(uid, str):
             uid = self.users[uid]
@@ -130,8 +124,6 @@ class MetaIndex:
                 "item_sent_ids": -1, "item_sent_mask": -1,
                 }
 
-        # --------------------------------------------------------------------
-
     # Le funzioni _get_history, _get_sent_reviews, _get_doc_reviews rimangono,
     # anche se le ultime due non verranno più chiamate.
 
@@ -144,7 +136,6 @@ class MetaIndex:
 
     def _get_sent_reviews(self, reviews):
         # QUESTA FUNZIONE È OBSOLETA E NON DOVREBBE ESSERE CHIAMATA.
-        # Se viene chiamata, significa che c'è un errore nella logica del programma.
         raise NotImplementedError(
             "La funzione '_get_sent_reviews' è stata deprecata con l'introduzione degli embedding pre-calcolati. "
             "Non dovrebbe essere mai chiamata."

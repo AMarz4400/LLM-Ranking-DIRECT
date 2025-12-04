@@ -15,15 +15,12 @@ import random
 SEED = 242
 reset_seed.frozen(SEED)
 
-# Gestione robusta del device
 import torch as tc
 device = "cuda:0" if tc.cuda.is_available() else "cpu"
 print(f"INFO: Using device: {device}")
 if device.startswith("cuda"):
     os.environ["CUDA_VISIBLE_DEVICES"] = device.split(':')[-1]
 
-# Non più necessario per le sole funzioni di test
-# from metrics.evaluate import CTREvaluator 
 import numpy as np
 import pandas as pd
 import tqdm
@@ -32,10 +29,7 @@ from models.DIRECT import DIRECT
 from datas.dataset import Dataset, MetaIndex, DocumentDataset
 from datas.logger import print
 from datas.preprocess import initialize_dataset
-# Non più necessario
-# from models.Losses import BPRLoss 
 
-# Impostato il nuovo modello T5Gemma
 plm = "google/t5gemma-2b-2b-prefixlm-it"
 amazon = ("reviewerID", "asin", "reviewText", "overall")
 yelp = ("user_id", "business_id", "text", "stars")
@@ -45,11 +39,11 @@ DATA_CONFIG = {
              "test": 0.2,
              "seed": SEED,
              "min_freq": 1,
-             "pretrain": plm, # Mantenuto per compatibilità con la creazione dei path
+             "pretrain": plm,
              "num_worker": 8,
              "force_init": False,
              },
-    "meta": {"tokenizer": plm, # Mantenuto per compatibilità con la firma di MetaIndex
+    "meta": {"tokenizer": plm,
              "num_sent": None,
              "len_sent": None,
              "num_hist": 30,
@@ -61,7 +55,6 @@ DATA_CONFIG = {
     "data": {"sampling": None,
              "cache_freq": 1}}
 
-# Rimuoviamo 'plm' da MODEL_CONFIG
 MODEL_CONFIG = {
     "aspc_num": 5,
     "dropout": 0.3,
@@ -99,8 +92,6 @@ STANDARD_HYPERPARAMETERS = {
 T = "{'lr': [1e-3],'g2': [1e-6],'aspc_num': [5]}"
 
 
-# --- Funzione get_subsets da mainGEMMA1.py ---
-# Questa è la versione corretta che carica gli embedding
 def get_subsets(datafile, setup, format_, configs, splits=("train", "valid", "test")):
     assert isinstance(configs, dict) and len(configs) == 3
     assert "init" in configs and "data" in configs and "meta" in configs
@@ -119,7 +110,7 @@ def get_subsets(datafile, setup, format_, configs, splits=("train", "valid", "te
     train_info = initialize_dataset(os.path.join(data_root, "train.json"), format_, users=main_meta.users,
                                     items=main_meta.items, **configs["init"])
 
-    # 4. Passiamo l'oggetto 'main_meta' già creato
+    # 4. Passa l'oggetto 'main_meta' già creato
     subsets = [Dataset(train_info["root"], "train", format_, main_meta, **configs["data"], setup=setup)]
     paths = {"train": train_info["root"]}
 
@@ -127,22 +118,18 @@ def get_subsets(datafile, setup, format_, configs, splits=("train", "valid", "te
         splitfile = os.path.join(data_root, f"{split}.json")
         info = initialize_dataset(splitfile, format_, users=main_meta.users, items=main_meta.items, **configs["init"])
 
-        # 5. Riutilizziamo 'main_meta'
         subsets.append(Dataset(info["root"], "train", format_, main_meta, **configs["data"],
                                paths=paths, split=split, setup=setup))
         if split == "valid":
             paths['valid'] = info["root"]
 
-    # 6. Questa parte rimane per compatibilità
     documents = DocumentDataset(os.path.join(data_root, "item_doc.txt"),
                                 configs["meta"]["tokenizer"], configs["meta"]["len_doc"],
                                 configs["meta"]["keep_head"], 1)
 
-    # 7. Ritorniamo l'istanza 'main_meta' che contiene i dati caricati.
     return main_meta, subsets, documents
 
 
-# --- Funzioni di Test da mainTEST.py (con modifiche) ---
 
 def evaluate_recommendation(model, data, k=10, N=200, U=128):
     model.eval()
@@ -184,9 +171,7 @@ def evaluate_recommendation(model, data, k=10, N=200, U=128):
             pairs = list(zip(tmp, items))
 
             x = [data.meta.get_feed_dict(user, item, "") for user, item in pairs]
-            
-            # --- MODIFICA APPLICATA ---
-            # Allineato alla logica di predict_bpr in mainGEMMA1.py
+
             batch = {k: tc.tensor(np.array([f[k] for f in x]), device=device) for k in x[0]}
             
             Y_pred = model(**batch).squeeze().cpu().numpy()
@@ -224,8 +209,6 @@ def evaluate_recommendation(model, data, k=10, N=200, U=128):
     return mean_recall, mean_precision, mean_hit, mean_auc
 
 
-# --- Funzione predict_bpr da mainGEMMA1.py ---
-# Questa è la versione già aggiornata
 def predict_bpr(model, data, k=10, N=200, U=128):
     opt = MODEL_CONFIG["device"]
     if N == -1:
@@ -293,7 +276,6 @@ def predict_bpr(model, data, k=10, N=200, U=128):
     return -recall_k, -avg_recall
 
 
-# --- Funzione test (setup BPR) da mainTEST.py ---
 def test(lr: float = TRAIN_CONFIG["learn_rate"],
          aspc_num: int = 3,
          g2: float = MODEL_CONFIG["gamma2"],
@@ -320,9 +302,6 @@ def test(lr: float = TRAIN_CONFIG["learn_rate"],
     model = DIRECT(user_num=len(meta.users),
                    item_num=len(meta.items),
                    **MODEL_CONFIG)
-    
-    # --- MODIFICA APPLICATA ---
-    # model.prepare_item_embedding(item_doc) # RIMOSSO
     
     model.load_state_dict(tc.load(parameters))
 
@@ -353,10 +332,8 @@ def test(lr: float = TRAIN_CONFIG["learn_rate"],
     return best_score, model, best_model
 
 
-# --- Funzione predict_default da mainTEST.py ---
-# (Nessuna modifica necessaria)
 def predict_default(model, data):
-    model.eval() # Metti il modello in modalità valutazione
+    model.eval() # modello in modalità valutazione
     device = next(model.parameters()).device # Ottieni il dispositivo del modello
 
     y_reals = [] # Lista per i valori reali
@@ -368,17 +345,14 @@ def predict_default(model, data):
 
     with tc.no_grad(): # Disabilita il calcolo dei gradienti per le inferenze
         for batch in dataloader:
-            # Sposta il batch sul dispositivo corretto
-            # NOTA: questo .to(device) non è necessario se il Dataset
-            # sposta già i dati su CUDA, ma è una buona pratica difensiva.
-            batch = {k: v.to(device) if isinstance(v, tc.Tensor) else v for k, v in batch.items()}
 
+            batch = {k: v.to(device) if isinstance(v, tc.Tensor) else v for k, v in batch.items()}
 
             y_real = batch["score"] # Estrai i punteggi reali
             y_pred = model(**batch) # Ottieni i punteggi predetti dal modello
 
             y_reals.extend(y_real.cpu().numpy()) # Aggiungi i reali (su CPU) alla lista
-            y_preds.extend(y_pred.squeeze().cpu().numpy()) # Aggiungi i predetti (su CPU e 'squeezati') alla lista
+            y_preds.extend(y_pred.squeeze().cpu().numpy()) # Aggiungi i predetti alla lista
 
     y_reals = np.array(y_reals) # Converti in array NumPy
     y_preds = np.array(y_preds)
@@ -392,14 +366,13 @@ def predict_default(model, data):
     return mse, rmse, mae
 
 
-# --- Funzione test_default da mainTEST.py ---
 def test_default(lr: float = TRAIN_CONFIG["learn_rate"],
                  aspc_num: int = MODEL_CONFIG["aspc_num"],
                  g2: float = MODEL_CONFIG["gamma2"],
-                 setup: str = "default", # Assicurati che il setup sia "default"
+                 setup: str = "default",
                  datafile: str = "./datasets/reviews_Toys_and_Games_5.json",
                  grid_seed: str = "False",
-                 parameters: str = "./outputs/reviews_Toys_and_Games_5/setup-default_SEED-242_GRIDSEED-False_DIRECT.pth"): # Percorso del modello salvato
+                 parameters: str = "./outputs/reviews_Toys_and_Games_5/setup-default_SEED-242_GRIDSEED-False_DIRECT.pth"):
     print("\n===== CONFIGURAZIONE ESPERIMENTO DI TEST =====")
     print(f"Datafile:        {datafile}")
     print(f"Setup:           {setup}")
@@ -422,10 +395,7 @@ def test_default(lr: float = TRAIN_CONFIG["learn_rate"],
     model = DIRECT(user_num=len(meta.users),
                    item_num=len(meta.items),
                    **MODEL_CONFIG)
-    
-    # --- MODIFICA APPLICATA ---
-    # model.prepare_item_embedding(item_doc) # RIMOSSO
-    
+
     model.load_state_dict(tc.load(parameters)) # Carica i pesi del modello pre-addestrato
 
     now = datetime.now()

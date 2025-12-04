@@ -135,7 +135,7 @@ def pretokenize(root, key, num_worker, pretrain, drop_stopword, drop_uncommen, f
             writer = Writer(root, outputs)
             tokenizers = [Pretokenizer(pretrain, drop_stopword, drop_uncommen, inputs, outputs, key) \
                           for _ in range(num_worker)]
-            #print("Begin to pre-tokenize reviews: Reviews=%d | Workers=%d" % (total, len(tokenizers)))
+
             f.seek(0)
             for row in tqdm.tqdm(f, total=total):
                 inputs.put(row)
@@ -148,7 +148,6 @@ def pretokenize(root, key, num_worker, pretrain, drop_stopword, drop_uncommen, f
                 pass
         assert check == total
         shutil.copyfile(root + ".tokenized", root)
-        #print("Finished pre-tokenized reviews")
 
 
 def ensure_item_in_training(root, uid, iid, text, score):

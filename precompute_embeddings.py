@@ -8,7 +8,6 @@ import math
 
 # --- CONFIGURAZIONE ---
 PLM_NAME = "google/t5gemma-2b-2b-prefixlm-it"
-# DATASET_NAME è stato rimosso qui, verrà preso dal ciclo
 SEED = 242
 BATCH_SIZE = 64
 LEN_DOC = 510
@@ -51,7 +50,6 @@ def generate_embeddings_batched(plm_model, tokenizer, device, source_file_path, 
 
         for line in batch_lines:
             doc_text = line.strip().replace("\t", " ")
-            # Assumiamo che tokenizer.transform() gestisca la tokenizzazione
             input_ids, attention_mask = tokenizer.transform(doc_text.split())
             batch_input_ids.append(input_ids)
             batch_attention_masks.append(attention_mask)

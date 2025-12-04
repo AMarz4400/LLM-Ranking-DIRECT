@@ -14,7 +14,6 @@ import random
 SEED = 242
 reset_seed.frozen(SEED)
 
-# MODIFICA: Gestione robusta del device
 import torch as tc
 device = "cuda:0" if tc.cuda.is_available() else "cpu"
 print(f"INFO: Using device: {device}")
@@ -32,7 +31,6 @@ from datas.logger import print
 from datas.preprocess import initialize_dataset
 from models.Losses import BPRLoss
 
-# MODIFICA: Impostato il nuovo modello T5Gemma
 plm = "google/t5gemma-2b-2b-prefixlm-it"
 amazon = ("reviewerID", "asin", "reviewText", "overall")
 yelp = ("user_id", "business_id", "text", "stars")
@@ -42,12 +40,12 @@ DATA_CONFIG = {
              "test": 0.2,
              "seed": SEED,
              "min_freq": 1,
-             "pretrain": plm, # Mantenuto per compatibilità con la creazione dei path
+             "pretrain": plm,
              "num_worker": 8,
              # MODIFICA: Imposta a False dopo aver generato i dati una volta
              "force_init": False,
              },
-    "meta": {"tokenizer": plm, # Mantenuto per compatibilità con la firma di MetaIndex
+    "meta": {"tokenizer": plm,
              "num_sent": None,
              "len_sent": None,
              "num_hist": 30,
@@ -59,8 +57,6 @@ DATA_CONFIG = {
     "data": {"sampling": None,
              "cache_freq": 1}}
 
-# --- MODIFICA 1: Rimuoviamo 'plm' da MODEL_CONFIG ---
-# Il nuovo modello DIRECT non ha più l'encoder, quindi non necessita di questo parametro.
 MODEL_CONFIG = {
     "aspc_num": 5,
     "dropout": 0.3,
@@ -74,12 +70,10 @@ MODEL_CONFIG = {
     "device": device,
 }
 
-# --- MODIFICA 2: Riduzione del Learning Rate per stabilità ---
-# Come scoperto dal log precedente, un LR più basso previene l'esplosione dei gradienti (loss=nan)
 TRAIN_CONFIG = {
     "learn_rate": 1e-4, # Ridotto da 0.001
     "use_amp": True,
-    "batch_size": 64, # Mantenuto come da tua configurazione funzionante
+    "batch_size": 64,
     "workers": 4,
     "num_epochs": 50,
     "decay_rate": 0.1,
@@ -101,19 +95,17 @@ T = "{'lr': [1e-3],'g2': [1e-6],'aspc_num': [5]}"
 
 
 
-# get_subsets() adesso ha 'datafile' (ex 'root') e setup (rimosso dalle variabili globali)
 
 def get_subsets(datafile, setup, format_, configs, splits=("train", "valid", "test")):
     assert isinstance(configs, dict) and len(configs) == 3
     assert "init" in configs and "data" in configs and "meta" in configs
     configs = copy.deepcopy(configs)
 
-    # 1. Questa chiamata prepara le directory e i file di testo base.
+    # prepara le directory e i file di testo base.
     root_info = initialize_dataset(datafile, format_, dotokenize=True, **configs["init"])
     data_root = root_info["root"]
 
-    # 2. --- MODIFICA CHIAVE: Creiamo l'oggetto MetaIndex UNA SOLA VOLTA ---
-    # Questa è l'unica chiamata che caricherà i 138GB di embedding in RAM.
+    # 2.Creiamo l'oggetto MetaIndex UNA SOLA VOLTA
     main_meta = MetaIndex(data_root, **configs["meta"])
 
     configs["init"]["valid"] = configs["init"]["test"] = 0.0
@@ -122,32 +114,28 @@ def get_subsets(datafile, setup, format_, configs, splits=("train", "valid", "te
     train_info = initialize_dataset(os.path.join(data_root, "train.json"), format_, users=main_meta.users,
                                     items=main_meta.items, **configs["init"])
 
-    # 4. --- MODIFICA CHIAVE: Passiamo l'oggetto 'main_meta' già creato ---
-    # Non creiamo un nuovo MetaIndex, ma riutilizziamo quello esistente.
+    # 4.Passiamo l'oggetto 'main_meta' già creato
+
     subsets = [Dataset(train_info["root"], "train", format_, main_meta, **configs["data"], setup=setup)]
     paths = {"train": train_info["root"]}
 
     for split in splits[1:]:
         splitfile = os.path.join(data_root, f"{split}.json")
         info = initialize_dataset(splitfile, format_, users=main_meta.users, items=main_meta.items, **configs["init"])
-
-        # 5. --- MODIFICA CHIAVE: Anche qui, riutilizziamo 'main_meta' ---
         subsets.append(Dataset(info["root"], "train", format_, main_meta, **configs["data"],
                                paths=paths, split=split, setup=setup))
         if split == "valid":
             paths['valid'] = info["root"]
 
-    # 6. Questa parte rimane per compatibilità, anche se non usata dal modello pre-calcolato.
     documents = DocumentDataset(os.path.join(data_root, "item_doc.txt"),
                                 configs["meta"]["tokenizer"], configs["meta"]["len_doc"],
                                 configs["meta"]["keep_head"], 1)
 
-    # 7. Ritorniamo l'istanza 'main_meta' che contiene i dati caricati.
+    # 5. Ritorniamo l'istanza 'main_meta' che contiene i dati caricati.
     return main_meta, subsets, documents
 
 
 
-# Sostituisci la tua funzione fit_BPR esistente con questa
 def fit_BPR(datafile, grid_seed, setup, datas, model, optimizer, learn_rate, batch_size, num_epochs, max_norm,
             log_frequency,
             frozen_train_size,
@@ -205,10 +193,9 @@ def fit_BPR(datafile, grid_seed, setup, datas, model, optimizer, learn_rate, bat
         print(f"\n[Fine Epoca {epoch}] Loss Media: {avg_epoch_loss:.4f}")
 
         recall_at_10, avg_recall = predict_bpr(model, datas[1])
-        # NOTA: La recall viene restituita come valore negativo da predict_bpr
         print(f"Valid Epoch={epoch} | Recall@10={recall_at_10:.4f} | AVG_Recall={avg_recall:.4f}")
 
-        # --- LOGICA DI EARLY STOPPING ORIGINALE RIPRISTINATA ---
+
         if recall_at_10 < best_recall:
             current_tol = 0
             best_recall = recall_at_10
@@ -414,10 +401,6 @@ def train(lr: float = TRAIN_CONFIG["learn_rate"],
                    item_num=len(meta.items),
                    **MODEL_CONFIG)
 
-    # --- MODIFICA 3: Rimuoviamo la chiamata a prepare_item_embedding ---
-    # Questa funzione è ora obsoleta e non fa nulla, quindi la chiamata può essere rimossa.
-    # model.prepare_item_embedding(item_doc)
-
     now = datetime.now()
     best_score, best_model = 0, ""
     print(f"Inizio Training: {now}")
@@ -487,7 +470,7 @@ def grid(HYPERPARAMETERS=None,
     # Eseguo la grid con le combinazioni da calcolare
     for combination in combinations:
 
-        # Faccio una copia a parte (combination mi serve dopo per aggiornare il file grid.csv)
+
         tmp = copy.deepcopy(combination)
         tmp['grid_seed'] = grid_seed
         tmp['setup'] = setup

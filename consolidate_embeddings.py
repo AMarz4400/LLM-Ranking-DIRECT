@@ -2,9 +2,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 
-# --- CONFIGURAZIONE ---
-# Questa variabile non è più usata direttamente da main(), ma la lista datasets sì.
-# DATASET_NAME = "reviews_Toys_and_Games_5" 
+
 SEED = 242
 
 datasets = ["reviews_Clothing_Shoes_and_Jewelry_5"]
@@ -18,7 +16,7 @@ def consolidate_files(source_directory, output_file_path):
     print(f"\n--- Inizio consolidamento per: {source_directory} ---")
 
     if not os.path.isdir(source_directory):
-        # Usiamo un avviso invece di un'eccezione per continuare con gli altri dataset
+
         print(f"ATTENZIONE: La directory sorgente non è stata trovata: {source_directory}. Salto.")
         return
 
@@ -57,14 +55,11 @@ def consolidate_files(source_directory, output_file_path):
         except FileNotFoundError:
              # Questo gestisce il caso in cui ci sia un buco nella numerazione
              print(f"ATTENZIONE: File {i}.npy non trovato. Potrebbe esserci un problema di numerazione. Continuo.")
-             # Potresti voler gestire in modo più rigoroso se l'integrità dei dati è critica
-             # Per ora, usiamo la riga di zeri predefinita per l'array in questa posizione
              continue
 
 
-    # Salva la matrice grande su disco
+    # Salva la matrice su disco
     print(f"Salvataggio del file consolidato in: {output_file_path}")
-    # Assicurati che la directory di output esista prima di salvare
     os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
     np.save(output_file_path, consolidated_array)
     print("Salvataggio completato. ✅")
@@ -92,14 +87,13 @@ def main():
             (os.path.join(data_root, "item_masks"),           os.path.join(data_root, "all_item_masks.npy")),
         ]
 
-        # Esegui il consolidamento per ogni set di dati del dataset corrente
+        # consolidamento per ogni set di dati del dataset corrente
         for source_dir, output_file in paths_to_process:
             consolidate_files(source_dir, output_file)
 
         print(f"Terminato il consolidamento per il dataset: {dataset_name}.")
 
     print("\n\n🎉 Consolidamento di tutti gli embedding completato con successo per tutti i dataset! 🎉")
-    print("Ora puoi procedere con la modifica di 'datas/dataset.py'.")
 
 
 
